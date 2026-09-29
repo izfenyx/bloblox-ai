@@ -1,26 +1,25 @@
 const express = require('express');
-const { GoogleGenAI } = require('@google/genai');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 const app = express();
 
 app.use(express.json());
 
-// Inicializar Google Gen AI con la variable de entorno
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 app.post('/chat', async (req, res) => {
     try {
         const userMessage = req.body.message || "Hola";
         console.log("Mensaje recibido de Roblox:", userMessage);
 
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: userMessage,
-            config: {
-                systemInstruction: "Eres una chica de anime amigable y conversacional que vive dentro de un juego de Roblox. Responde de forma breve y tierna.",
-            },
+        const model = genAI.getGenerativeModel({ 
+            model: "gemini-1.5-flash",
+            systemInstruction: "Eres una chica de anime amigable y conversacional que vive dentro de un juego de Roblox. Responde de forma breve y tierna."
         });
 
-        const reply = response.text;
+        const result = await model.generateContent(userMessage);
+        const response = await result.response;
+        const reply = response.text();
+        
         res.json({ reply: reply });
 
     } catch (error) {
