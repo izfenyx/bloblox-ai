@@ -11,12 +11,13 @@ const openai = new OpenAI({
 app.post('/chat', async (req, res) => {
     try {
         const userMessage = req.body.message;
+        console.log("Mensaje recibido de Roblox:", userMessage);
 
         const completion = await openai.chat.completions.create({
             model: "gpt-4o-mini",
             messages: [
                 { role: "system", content: "Eres una chica de anime amigable y conversacional que vive dentro de un juego de Roblox. Responde de forma breve y tierna." },
-                { role: "user", content: userMessage }
+                { role: "user", content: userMessage || "Hola" }
             ],
         });
 
@@ -24,8 +25,8 @@ app.post('/chat', async (req, res) => {
         res.json({ reply: reply });
 
     } catch (error) {
-        console.error("Error al conectar con OpenAI:", error);
-        res.status(500).json({ reply: "¡Ay no! Me mareé un poco, ¿me lo repites?" });
+        console.error("DETALLE DEL ERROR DE OPENAI:", error);
+        res.status(500).json({ reply: "¡Ay no! Me dio un error interno en la nube." });
     }
 });
 
