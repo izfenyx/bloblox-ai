@@ -1,26 +1,26 @@
 const express = require('express');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { GoogleGenAI } = require('@google/genai');
 const app = express();
 
 app.use(express.json());
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// Inicializador del SDK moderno y gratuito de Google AI Studio
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 app.post('/chat', async (req, res) => {
     try {
         const userMessage = req.body.message || "Hola";
         console.log("Mensaje recibido de Roblox:", userMessage);
 
-        // Usamos el identificador exacto compatible con la API gratuita
-        const model = genAI.getGenerativeModel({ 
-            model: "gemini-1.5-flash",
-            systemInstruction: "Eres una chica de anime amigable y conversacional que vive dentro de un juego de Roblox. Responde de forma breve y tierna."
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: userMessage,
+            config: {
+                systemInstruction: "Eres una chica de anime amigable y conversacional que vive dentro de un juego de Roblox. Responde de forma breve y tierna.",
+            },
         });
 
-        const result = await model.generateContent(userMessage);
-        const response = await result.response;
-        const reply = response.text();
-        
+        const reply = response.text;
         res.json({ reply: reply });
 
     } catch (error) {
