@@ -1,29 +1,40 @@
 const express = require('express');
-const { GoogleGenAI } = require('@google/genai');
 const app = express();
 
 app.use(express.json());
 
-// Inicializador compatible con las nuevas claves AQ.
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
 app.post('/chat', async (req, res) => {
     try {
-        const mensajeUsuario = req.body.message || "Hola";
-        console.log("Mensaje recibido de Roblox:", mensajeUsuario);
+        const textoEntrada = req.body.message || "Hola";
+        console.log("Mensaje recibido de Roblox:", textoEntrada);
 
-        // Usamos el cliente moderno con el modelo actual compatible
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.0-flash',
-            contents: mensajeUsuario,
+        const apiKey = process.env.GEMINI_API_KEY;
+        // Usamos la API v1beta con gemini-2.0-flash que es compatible con las claves AQ.
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+        const apiResponse = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{ text: textoEntrada }]
+                }]
+            })
         });
 
-        const respuestaTexto = response.text;
-        res.json({ reply: respuestaTexto });
+        const data = await apiResponse.json();
+
+        if (!apiResponse.ok) {
+            console.error("Error de la API de Google:", data);
+            return res.status(500).json({ reply: "¡Ay no! Google rechazó la conexión." });
+        }
+
+        const reply = data.candidates[0].content.parts[0].text;
+        res.json({ reply: reply });
 
     } catch (error) {
-        console.error("ERROR CON CLAVE AQ:", error);
-        res.status(500).json({ reply: "¡Ay no! Hubo un problema con la clave de IA." });
+        console.error("ERROR CRÍTICO:", error);
+        res.status(500).json({ reply: "¡Ay no! Falló el servidor." });
     }
 });
 
