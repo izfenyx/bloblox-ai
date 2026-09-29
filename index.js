@@ -12,8 +12,7 @@ app.post('/chat', async (req, res) => {
         console.log("Mensaje recibido de Roblox:", userMessage);
 
         const model = genAI.getGenerativeModel({ 
-            model: "gemini-pro",
-            systemInstruction: "Eres una chica de anime amigable y conversacional que vive dentro de un juego de Roblox. Responde de forma breve y tierna."
+            model: "gemini-pro"
         });
 
         const result = await model.generateContent(userMessage);
