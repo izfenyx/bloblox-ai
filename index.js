@@ -1,40 +1,29 @@
 const express = require('express');
+const { GoogleGenAI } = require('@google/genai');
 const app = express();
 
 app.use(express.json());
 
+// Inicializador compatible con las nuevas claves AQ.
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
 app.post('/chat', async (req, res) => {
     try {
-        const textoEntrada = req.body.message || "Hola";
-        console.log("Mensaje recibido de Roblox:", textoEntrada);
+        const mensajeUsuario = req.body.message || "Hola";
+        console.log("Mensaje recibido de Roblox:", mensajeUsuario);
 
-        const apiKey = process.env.GEMINI_API_KEY;
-        // Apuntamos a la versión v1 con el modelo gemini-1.5-flash que sí existe
-        const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-
-        const apiResponse = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{
-                    parts: [{ text: textoEntrada }]
-                }]
-            })
+        // Usamos el cliente moderno con el modelo actual compatible
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.0-flash',
+            contents: mensajeUsuario,
         });
 
-        const data = await apiResponse.json();
-
-        if (!apiResponse.ok) {
-            console.error("Error de la API de Google:", data);
-            return res.status(500).json({ reply: "¡Ay no! Google rechazó la conexión." });
-        }
-
-        const reply = data.candidates[0].content.parts[0].text;
-        res.json({ reply: reply });
+        const respuestaTexto = response.text;
+        res.json({ reply: respuestaTexto });
 
     } catch (error) {
-        console.error("ERROR CRÍTICO:", error);
-        res.status(500).json({ reply: "¡Ay no! Falló el servidor." });
+        console.error("ERROR CON CLAVE AQ:", error);
+        res.status(500).json({ reply: "¡Ay no! Hubo un problema con la clave de IA." });
     }
 });
 
