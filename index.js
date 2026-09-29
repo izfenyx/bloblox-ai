@@ -11,9 +11,9 @@ app.post('/chat', async (req, res) => {
         const userMessage = req.body.message || "Hola";
         console.log("Mensaje recibido de Roblox:", userMessage);
 
-        // Usamos gemini-1.5-pro que está totalmente soportado
+        // Usamos el identificador exacto compatible con la API gratuita
         const model = genAI.getGenerativeModel({ 
-            model: "gemini-1.5-pro",
+            model: "gemini-1.5-flash",
             systemInstruction: "Eres una chica de anime amigable y conversacional que vive dentro de un juego de Roblox. Responde de forma breve y tierna."
         });
 
