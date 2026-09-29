@@ -4,29 +4,30 @@ const app = express();
 
 app.use(express.json());
 
-const apiGenerative = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const clienteGemini = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 app.post('/chat', async (req, res) => {
     try {
-        const mensajeUsuario = req.body.message || "Hola";
-        console.log("Mensaje de Roblox recibido correctamente:", mensajeUsuario);
+        const textoEntrada = req.body.message || "Hola";
+        console.log("Petición recibida desde Roblox:", textoEntrada);
 
-        const motorIA = apiGenerative.getGenerativeModel({ 
+        // Usamos gemini-1.5-pro con la librería oficial clásica y estable
+        const modeloIA = clienteGemini.getGenerativeModel({ 
             model: "gemini-1.5-pro" 
         });
 
-        const resultado = await motorIA.generateContent(mensajeUsuario);
-        const respuestaFinal = await resultado.response.text();
+        const respuestaBruta = await modeloIA.generateContent(textoEntrada);
+        const respuestaFinal = await respuestaBruta.response.text();
         
         res.json({ reply: respuestaFinal });
 
     } catch (error) {
-        console.error("DETALLE DEL ERROR DE GEMINI:", error);
-        res.status(500).json({ reply: "¡Ay no! Tuve un problema interno con la IA." });
+        console.error("ERROR CRÍTICO EN GEMINI:", error);
+        res.status(500).json({ reply: "¡Ay no! Tuve un problema conectando con la IA." });
     }
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Servidor activo en el puerto ${PORT}`);
+    console.log(`Servidor en línea en el puerto ${PORT}`);
 });
