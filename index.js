@@ -5,18 +5,20 @@ app.use(express.json());
 
 app.post('/chat', async (req, res) => {
     try {
-        // Recibimos todo el historial de la conversación que manda Roblox
-        const historialMensajes = req.body.contents;
-        console.log("Historial recibido:", JSON.stringify(historialMensajes));
+        const textoEntrada = req.body.message || "Hola";
+        console.log("Mensaje recibido de Roblox:", textoEntrada);
 
         const apiKey = process.env.GEMINI_API_KEY;
+        // Usamos el modelo exacto que confirmaste en la interfaz
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${apiKey}`;
 
         const apiResponse = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                contents: historialMensajes
+                contents: [{
+                    parts: [{ text: textoEntrada }]
+                }]
             })
         });
 
