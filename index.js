@@ -9,8 +9,8 @@ app.post('/chat', async (req, res) => {
         console.log("Mensaje recibido de Roblox:", textoEntrada);
 
         const apiKey = process.env.GEMINI_API_KEY;
-        // Usamos el endpoint oficial universal de Gemini v1
-        const url = `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`;
+        // Apuntamos a la versión v1 con el modelo gemini-1.5-flash que sí existe
+        const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
         const apiResponse = await fetch(url, {
             method: 'POST',
@@ -29,7 +29,6 @@ app.post('/chat', async (req, res) => {
             return res.status(500).json({ reply: "¡Ay no! Google rechazó la conexión." });
         }
 
-        // Extraer la respuesta de la estructura JSON de Google
         const reply = data.candidates[0].content.parts[0].text;
         res.json({ reply: reply });
 
