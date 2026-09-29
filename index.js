@@ -9,8 +9,8 @@ app.post('/chat', async (req, res) => {
         console.log("Mensaje recibido de Roblox:", textoEntrada);
 
         const apiKey = process.env.GEMINI_API_KEY;
-        // Usamos la API v1beta con gemini-2.0-flash que es compatible con las claves AQ.
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+        // Usamos el modelo exacto que confirmaste en la interfaz
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${apiKey}`;
 
         const apiResponse = await fetch(url, {
             method: 'POST',
