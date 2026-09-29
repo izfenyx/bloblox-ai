@@ -1,32 +1,31 @@
 const express = require('express');
-const OpenAI = require('openai');
+const { GoogleGenAI } = require('@google/genai');
 const app = express();
 
 app.use(express.json());
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+// Inicializar Google Gen AI con la variable de entorno
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 app.post('/chat', async (req, res) => {
     try {
-        const userMessage = req.body.message;
+        const userMessage = req.body.message || "Hola";
         console.log("Mensaje recibido de Roblox:", userMessage);
 
-        const completion = await openai.chat.completions.create({
-            model: "gpt-4o-mini",
-            messages: [
-                { role: "system", content: "Eres una chica de anime amigable y conversacional que vive dentro de un juego de Roblox. Responde de forma breve y tierna." },
-                { role: "user", content: userMessage || "Hola" }
-            ],
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: userMessage,
+            config: {
+                systemInstruction: "Eres una chica de anime amigable y conversacional que vive dentro de un juego de Roblox. Responde de forma breve y tierna.",
+            },
         });
 
-        const reply = completion.choices[0].message.content;
+        const reply = response.text;
         res.json({ reply: reply });
 
     } catch (error) {
-        console.error("DETALLE DEL ERROR DE OPENAI:", error);
-        res.status(500).json({ reply: "¡Ay no! Me dio un error interno en la nube." });
+        console.error("Error al conectar con Gemini:", error);
+        res.status(500).json({ reply: "¡Ay no! Me mareé un poco con la nube." });
     }
 });
 
