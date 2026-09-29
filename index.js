@@ -5,7 +5,6 @@ app.use(express.json());
 
 app.post('/chat', async (req, res) => {
     try {
-        // Recibimos todo el historial de la conversación que manda Roblox
         const historialMensajes = req.body.contents;
         console.log("Historial recibido:", JSON.stringify(historialMensajes));
 
@@ -27,7 +26,8 @@ app.post('/chat', async (req, res) => {
             return res.status(500).json({ reply: "¡Ay no! Google rechazó la conexión." });
         }
 
-        const reply = data.candidates[0].content.parts[0].text;
+        // Validación segura para extraer el texto de la respuesta con historial
+        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Lo siento, no entendí bien.";
         res.json({ reply: reply });
 
     } catch (error) {
