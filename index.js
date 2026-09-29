@@ -1,35 +1,45 @@
 const express = require('express');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
 const app = express();
 
 app.use(express.json());
 
-// Pasamos la configuración explícitamente para forzar la API v1 estable
-const clienteGemini = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
 app.post('/chat', async (req, res) => {
     try {
         const textoEntrada = req.body.message || "Hola";
-        console.log("Petición recibida desde Roblox:", textoEntrada);
+        console.log("Mensaje recibido de Roblox:", textoEntrada);
 
-        // Forzamos el uso de la versión v1 de la API con el modelo flash estándar
-        const modeloIA = clienteGenerative.getGenerativeModel(
-            { model: "gemini-1.5-flash" },
-            { apiVersion: 'v1' }
-        );
+        const apiKey = process.env.GEMINI_API_KEY;
+        // Usamos el endpoint oficial universal de Gemini v1
+        const url = `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`;
 
-        const respuestaBruta = await modeloIA.generateContent(textoEntrada);
-        const respuestaFinal = await respuestaBruta.response.text();
-        
-        res.json({ reply: respuestaFinal });
+        const apiResponse = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{ text: textoEntrada }]
+                }]
+            })
+        });
+
+        const data = await apiResponse.json();
+
+        if (!apiResponse.ok) {
+            console.error("Error de la API de Google:", data);
+            return res.status(500).json({ reply: "¡Ay no! Google rechazó la conexión." });
+        }
+
+        // Extraer la respuesta de la estructura JSON de Google
+        const reply = data.candidates[0].content.parts[0].text;
+        res.json({ reply: reply });
 
     } catch (error) {
-        console.error("ERROR CRÍTICO EN GEMINI:", error);
-        res.status(500).json({ reply: "¡Ay no! Tuve un problema conectando con la IA." });
+        console.error("ERROR CRÍTICO:", error);
+        res.status(500).json({ reply: "¡Ay no! Falló el servidor." });
     }
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Servidor en línea en el puerto ${PORT}`);
+    console.log(`Servidor activo en el puerto ${PORT}`);
 });
