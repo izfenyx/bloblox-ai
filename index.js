@@ -5,20 +5,15 @@ app.use(express.json());
 
 app.post('/chat', async (req, res) => {
     try {
-        // 1. Recibimos el arreglo de mensajes completo enviado desde Roblox
         const historialMensajes = req.body.messages;
 
         if (!historialMensajes || !Array.isArray(historialMensajes)) {
-            console.error("No se recibió un arreglo de mensajes válido.");
             return res.status(400).json({ reply: "¡Ay no! Faltó el historial de mensajes." });
         }
-
-        console.log("Historial de mensajes recibido de Roblox:", JSON.stringify(historialMensajes, null, 2));
 
         const apiKey = process.env.GEMINI_API_KEY;
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${apiKey}`;
 
-        // 2. Traducimos el formato de roles al formato que exige la API de Gemini (user / model)
         let contentsGemini = [];
         let systemInstructionText = "";
 
